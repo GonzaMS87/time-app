@@ -11,9 +11,9 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('https://hub.docker.com/repository/docker/gonchi87/time-app', '5b6c696b-8453-45ad-9758-bd2a537f4bd3') {
-                        def image = docker.build("gonchi87/time-app:${env.BUILD_NUMBER}", "-f Dockerfile .")
-                        image.push()
+                    docker.withRegistry('https://index.docker.io/v1/', '5b6c696b-8453-45ad-9758-bd2a537f4bd3') {
+                        def dockerImage = docker.build("gonchi87/time-app:${env.BUILD_NUMBER}", "-f Dockerfile .")
+                        dockerImage.push()
                     }
                 }
             }
@@ -30,3 +30,4 @@ pipeline {
         }
     }
 }
+
