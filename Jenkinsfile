@@ -31,3 +31,4 @@ pipeline {
     }
 }
 
+// def dockerImage = docker.build("gonchi87/time-app:${env.BUILD_NUMBER}", "-f Dockerfile .")
