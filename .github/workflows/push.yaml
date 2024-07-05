@@ -1,0 +1,33 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup SSH agent for bastion
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.APP_KEY }}
+
+    - name: Add private key for internal SSH
+      run: |
+        echo "${{ secrets.APP_KEY }}" > key.pem
+        chmod 600 key.pem
+
+    - name: SSH to Bastion and then to Private Instances
+      run: |
+        ssh -o StrictHostKeyChecking=no -A ubuntu@<54.67.86.50> << 'EOF'
+          ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@<10.0.4.75> "cd /home/ubuntu/time-app && git pull origin main && pkill -f app.py && nohup python3 app.py &"
+          ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@<10.0.3.141> "cd /home/ubuntu/time-app && git pull origin main && pkill -f app.py && nohup python3 app.py &"
+        EOF  
+    - name: Cleanup
+      run: rm key.pem
