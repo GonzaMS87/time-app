@@ -25,22 +25,32 @@ jobs:
 
     - name: SSH to Bastion and then to Private Instance 1
       run: |
-        ssh -o StrictHostKeyChecking=no -A ubuntu@54.67.86.50 << 'EOF'
-          ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@10.0.4.75 << 'INNER_EOF'
+        ssh -tt -o StrictHostKeyChecking=no -A ubuntu@54.67.86.50 << 'EOF'
+          ssh -tt -i key.pem -o StrictHostKeyChecking=no ubuntu@10.0.4.75 << 'INNER_EOF'
             cd /home/ubuntu/time-app
+            git config --global --add safe.directory /home/ubuntu/time-app
             git pull origin main
-            pkill -f app.py
+            sudo pkill -f app.py
+            if lsof -i:5000; then
+              echo "Port 5000 is in use. Killing the process..."
+              sudo kill -9 $(lsof -t -i:5000)
+            fi
             nohup python3 app.py &
           INNER_EOF
         EOF
 
     - name: SSH to Bastion and then to Private Instance 2
       run: |
-        ssh -o StrictHostKeyChecking=no -A ubuntu@54.67.86.50 << 'EOF'
-          ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@10.0.3.141 << 'INNER_EOF'
+        ssh -tt -o StrictHostKeyChecking=no -A ubuntu@54.67.86.50 << 'EOF'
+          ssh -tt -i key.pem -o StrictHostKeyChecking=no ubuntu@10.0.3.141 << 'INNER_EOF'
             cd /home/ubuntu/time-app
+            git config --global --add safe.directory /home/ubuntu/time-app
             git pull origin main
-            pkill -f app.py
+            sudo pkill -f app.py
+            if lsof -i:5000; then
+              echo "Port 5000 is in use. Killing the process..."
+              sudo kill -9 $(lsof -t -i:5000)
+            fi
             nohup python3 app.py &
           INNER_EOF
         EOF
