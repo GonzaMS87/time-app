@@ -11,10 +11,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3  # Actualiza a la versión que usa Node 16
 
     - name: Setup SSH agent for bastion
-      uses: webfactory/ssh-agent@v0.5.3
+      uses: webfactory/ssh-agent@v0.6.0  # Actualiza a la versión que usa Node 16
       with:
         ssh-private-key: ${{ secrets.APP_KEY }}
 
@@ -25,14 +25,25 @@ jobs:
 
     - name: SSH to Bastion and then to Private Instance 1
       run: |
-        ssh -o StrictHostKeyChecking=no -A ubuntu@<54.67.86.50> \
-          'ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@<10.0.4.75> "cd /home/ubuntu/time-app && git pull origin main && pkill -f app.py && nohup python3 app.py &"'
-      
+        ssh -o StrictHostKeyChecking=no -A ubuntu@54.67.86.50 << 'EOF'
+          ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@10.0.4.75 << 'INNER_EOF'
+            cd /home/ubuntu/time-app
+            git pull origin main
+            pkill -f app.py
+            nohup python3 app.py &
+          INNER_EOF
+        EOF
+
     - name: SSH to Bastion and then to Private Instance 2
       run: |
-        ssh -o StrictHostKeyChecking=no -A ubuntu@<54.67.86.50> \
-          'ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@<10.0.3.141> "cd /home/ubuntu/time-app && git pull origin main && pkill -f app.py && nohup python3 app.py &"'
-      
+        ssh -o StrictHostKeyChecking=no -A ubuntu@54.67.86.50 << 'EOF'
+          ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@10.0.3.141 << 'INNER_EOF'
+            cd /home/ubuntu/time-app
+            git pull origin main
+            pkill -f app.py
+            nohup python3 app.py &
+          INNER_EOF
+        EOF
+
     - name: Cleanup
       run: rm key.pem
-      
