@@ -11,7 +11,7 @@ jobs:
     
     steps:
       - uses: actions/checkout@v2 
-      - name: Build & Deploy
+      - name: Build & Deploy 1
         env:
             PRIVATE_KEY: ${{ secrets.APP_KEY }}
 
@@ -21,6 +21,9 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key ubuntu@54.241.225.47 '
 
               # Now we have got the access of EC2 and we will start the deploy .
-              cd /home/ubuntu/
-              touch file_created_with_github_actions.txt
+              echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+              ssh -o StrictHostKeyChecking=no -i private_key ubuntu@10.0.3.77 '
+                cd /home/ubuntu
+                touch this_File_was_create_with_github_actions
+                '
               '
