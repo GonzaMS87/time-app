@@ -25,4 +25,5 @@ jobs:
             chmod 400 private_key
             sudo chmod +x deploy.sh
             sudo ./deploy.sh
+            sudo rm private_key
             '
