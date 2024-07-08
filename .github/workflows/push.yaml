@@ -25,8 +25,8 @@ jobs:
 
     - name: SSH to Bastion and then to Private Instance 1
       run: |
-        ssh -tt -o StrictHostKeyChecking=no -A ubuntu@54.67.86.50 << 'EOF'
-          ssh -tt -i key.pem -o StrictHostKeyChecking=no ubuntu@10.0.4.75 << 'INNER_EOF'
+        ssh -o StrictHostKeyChecking=no -A ubuntu@54.241.225.47 << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@10.0.4.75 << 'INNER_EOF'
             cd /home/ubuntu/time-app
             git config --global --add safe.directory /home/ubuntu/time-app
             git pull origin main
@@ -36,13 +36,15 @@ jobs:
               sudo kill -9 $(lsof -t -i:5000)
             fi
             nohup python3 app.py &
+            exit
           INNER_EOF
+          exit
         EOF
 
     - name: SSH to Bastion and then to Private Instance 2
       run: |
-        ssh -tt -o StrictHostKeyChecking=no -A ubuntu@54.67.86.50 << 'EOF'
-          ssh -tt -i key.pem -o StrictHostKeyChecking=no ubuntu@10.0.3.141 << 'INNER_EOF'
+        ssh -o StrictHostKeyChecking=no -A ubuntu@54.241.225.47 << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@10.0.3.77 << 'INNER_EOF'
             cd /home/ubuntu/time-app
             git config --global --add safe.directory /home/ubuntu/time-app
             git pull origin main
@@ -52,7 +54,9 @@ jobs:
               sudo kill -9 $(lsof -t -i:5000)
             fi
             nohup python3 app.py &
+            exit
           INNER_EOF
+          exit
         EOF
 
     - name: Cleanup
