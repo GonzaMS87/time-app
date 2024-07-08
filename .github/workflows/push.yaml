@@ -1,63 +1,25 @@
-name: Deploy to EC2
+name: Deploy
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
-  deploy:
+  Deploy:
+    name: Deploy to EC2
     runs-on: ubuntu-latest
-
+    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3  # Actualiza a la versión que usa Node 16
+      - uses: actions/checkout@v2 
+      - name: Build & Deploy
+        env:
+            PRIVATE_KEY: ${{ secrets.APP_KEY }}
 
-    - name: Setup SSH agent for bastion
-      uses: webfactory/ssh-agent@v0.6.0  # Actualiza a la versión que usa Node 16
-      with:
-        ssh-private-key: ${{ secrets.APP_KEY }}
+      
+        run: |
+          echo "$APP_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@54.241.225.47 '
 
-    - name: Add private key for internal SSH
-      run: |
-        echo "${{ secrets.APP_KEY }}" > key.pem
-        chmod 600 key.pem
-
-    - name: SSH to Bastion and then to Private Instance 1
-      run: |
-        ssh -o StrictHostKeyChecking=no -A ubuntu@54.241.225.47 << 'EOF'
-          ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@10.0.4.75 << 'INNER_EOF'
-            cd /home/ubuntu/time-app
-            git config --global --add safe.directory /home/ubuntu/time-app
-            git pull origin main
-            sudo pkill -f app.py
-            if lsof -i:5000; then
-              echo "Port 5000 is in use. Killing the process..."
-              sudo kill -9 $(lsof -t -i:5000)
-            fi
-            nohup python3 app.py &
-            exit
-          INNER_EOF
-          exit
-        EOF
-
-    - name: SSH to Bastion and then to Private Instance 2
-      run: |
-        ssh -o StrictHostKeyChecking=no -A ubuntu@54.241.225.47 << 'EOF'
-          ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@10.0.3.77 << 'INNER_EOF'
-            cd /home/ubuntu/time-app
-            git config --global --add safe.directory /home/ubuntu/time-app
-            git pull origin main
-            sudo pkill -f app.py
-            if lsof -i:5000; then
-              echo "Port 5000 is in use. Killing the process..."
-              sudo kill -9 $(lsof -t -i:5000)
-            fi
-            nohup python3 app.py &
-            exit
-          INNER_EOF
-          exit
-        EOF
-
-    - name: Cleanup
-      run: rm key.pem
+              # Now we have got the access of EC2 and we will start the deploy .
+              cd /home/ubuntu/
+              touch file_created_with_github_actions.txt
