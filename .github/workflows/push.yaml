@@ -21,7 +21,7 @@ jobs:
           scp -o StrictHostKeyChecking=no -i private_key private_key ubuntu@54.241.225.47:/home/ubuntu
           ssh -o StrictHostKeyChecking=no -i private_key ubuntu@54.241.225.47 '
 
-            # Now we have got the access of EC2 and we will start the deploy
+            # Now we have got the access of Jump EC2 and we will start the deploy
             chmod 400 private_key
             sudo chmod +x deploy.sh
             sudo ./deploy.sh
